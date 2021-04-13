@@ -1,0 +1,221 @@
+----------------
+
+The ratio of simple expressions over all expressions is 0.10266666666666667
+seed = 0
+expression size  = 25
+sample size = 3000
+number of simple exps found = 308
+start time  2021-04-03 07:15:57.349607915 UTC
+finish time 2021-04-03 07:20:20.006942486 UTC
+
+----------------
+
+
+The ratio of simple expressions over all expressions is 0.2214
+seed = 0
+expression size  = 25
+sample size = 10000
+number of simple exps found = 2214
+start time  2021-04-03 13:31:36.716327882 UTC
+finish time 2021-04-03 13:34:04.036089561 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 0.1248
+seed = 0
+expression size  = 50
+sample size = 10000
+number of simple exps found = 1248
+start time  2021-04-03 13:32:24.317528715 UTC
+finish time 2021-04-03 13:36:52.056029079 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 9.225e-2
+seed = 0
+expression size  = 50
+sample size = 20000
+number of simple exps found = 1845
+start time  2021-04-05 07:59:45.846331849 UTC
+finish time 2021-04-05 08:15:49.645842118 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 6.39e-2
+seed = 0
+expression size  = 100
+sample size = 10000
+number of simple exps found = 639
+start time  2021-04-03 13:18:28.648697826 UTC
+finish time 2021-04-03 13:26:40.556537861 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 5.06e-2
+seed = 0
+expression size  = 100
+sample size = 20000
+number of simple exps found = 1012
+start time  2021-04-03 16:54:14.033640993 UTC
+finish time 2021-04-03 17:26:03.085660436 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 3.3e-2
+seed = 0
+expression size  = 500
+sample size = 1000
+number of simple exps found = 33
+start time  2021-04-03 13:54:58.985972438 UTC
+finish time 2021-04-03 13:55:59.524729995 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 3.7e-2
+seed = 0
+expression size  = 500
+sample size = 1000
+number of simple exps found = 37
+start time  2021-04-05 07:38:14.96102942 UTC
+finish time 2021-04-05 07:39:16.519212111 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 2.05e-2
+seed = 0
+expression size  = 500
+sample size = 2000
+number of simple exps found = 41
+start time  2021-04-03 14:10:35.685313534 UTC
+finish time 2021-04-03 14:13:16.003848302 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.6666666666666666e-2
+seed = 0
+expression size  = 500
+sample size = 3000
+number of simple exps found = 50
+start time  2021-04-03 14:27:15.062498235 UTC
+finish time 2021-04-03 14:32:29.094859807 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.34e-2
+seed = 0
+expression size  = 500
+sample size = 5000
+number of simple exps found = 67
+start time  2021-04-03 14:20:35.137118231 UTC
+finish time 2021-04-03 14:33:24.563551269 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.0875e-2
+seed = 0
+expression size  = 500
+sample size = 8000
+number of simple exps found = 87
+start time  2021-04-03 16:51:12.235492729 UTC
+finish time 2021-04-03 17:21:06.35080553 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.04e-2
+seed = 0
+expression size  = 500
+sample size = 10000
+number of simple exps found = 104
+start time  2021-04-03 19:18:48.129073304 UTC
+finish time 2021-04-03 20:03:33.93728032 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.01e-2
+seed = 0
+expression size  = 500
+sample size = 20000
+number of simple exps found = 202
+start time  2021-04-04 18:20:39.669764804 UTC
+finish time 2021-04-04 21:00:42.409667148 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 1.105e-2
+seed = 0
+expression size  = 500
+sample size = 20000
+number of simple exps found = 221
+start time  2021-04-05 07:58:30.723419193 UTC
+finish time 2021-04-05 10:42:21.824017408 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 0.12
+seed = 0
+expression size  = 1000
+sample size = 100
+number of simple exps found = 12
+start time  2021-04-03 19:20:43.111266444 UTC
+finish time 2021-04-03 19:21:01.172037587 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 3.5e-2
+seed = 0
+expression size  = 1000
+sample size = 400
+number of simple exps found = 14
+start time  2021-04-03 19:22:24.036664397 UTC
+finish time 2021-04-03 19:23:36.158269882 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 6.0e-3
+seed = 1000
+expression size  = 1000
+sample size = 1000
+number of simple exps found = 6
+start time  2021-04-07 11:49:33.682838499 UTC
+finish time 2021-04-07 12:05:54.84145814 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 6.0e-3
+seed = 0
+expression size  = 1000
+sample size = 8000
+number of simple exps found = 48
+start time  2021-04-03 19:25:51.999187477 UTC
+finish time 2021-04-03 20:39:28.047816554 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 6.2e-3
+seed = 0
+expression size  = 1000
+sample size = 10000
+number of simple exps found = 62
+start time  2021-04-04 07:16:38.957359107 UTC
+finish time 2021-04-04 08:57:28.648690293 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 6.0e-3
+seed = 0
+expression size  = 1000
+sample size = 12000
+number of simple exps found = 72
+start time  2021-04-04 20:54:06.680147289 UTC
+finish time 2021-04-04 23:06:36.349673769 UTC
+
+----------------
+
+The ratio of simple expressions over all expressions is 4.9e-3
+seed = 1000
+expression size  = 1000
+sample size = 10000
+number of simple exps found = 49
+start time  2021-04-07 16:37:05.496788603 UTC
+finish time 2021-04-07 23:30:17.512414856 UTC
+

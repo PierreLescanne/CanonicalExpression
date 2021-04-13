@@ -1,0 +1,39 @@
+----------------
+
+seed = 0
+expression size = 100
+sample size = 100
+number of simple expressions = 6
+number of non simple non tautology = 13
+The ration simple over not non classical simple is 0.46153846153846156
+start time  2021-04-08 11:52:19.795713049 UTC
+finish time 2021-04-08 11:52:28.397395656 UTC
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+seed = 0
+expression size = 100
+sample size = 400
+-----
+number of simples = 19
+number of non simple non tautologies = 30
+-----
+The ratio simple over non simple non tautologies is 0.3877551020408163
+-----
+start time:  2021-04-10 07:16:42.948119843 UTC
+finish time: 2021-04-10 07:20:42.115097104 UTC
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+seed = 0
+expression size = 100
+sample size = 4000
+-----
+number of simples = 140
+number of non simple non tautologies = 249
+-----
+The ratio simple over non simple non tautologies is 0.35989717223650386
+-----
+start time:  2021-04-10 08:02:43.002553549 UTC
+finish time: 2021-04-10 13:20:29.509493714 UTC
+
