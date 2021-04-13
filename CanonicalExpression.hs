@@ -164,7 +164,7 @@ aRestGrStr seed sz = partitionsR sz !! (fromIntegral $ randomInt (fromIntegral $
 
 -- ~~~~ Stam algorithm ~~~~
 -- (see Knuth Algorithm R, in TAOCP vol4A, fasicle 3, § 7.2.1.5, page 74)
--- values of probForM5, probForM10, probForM25, probForM100  and probForM1000 are in Constants.hs
+-- values of probForM10, probForM25, probForM100 etc. are in Constants.hs
 -- They are computed elsewhere (SageMath) and patched here?
 accu :: Num a => [a] -> [a]
 accu [] = []
@@ -183,17 +183,6 @@ rand = do generator <- get
           let (value, newGenerator) = randomR (0,1) generator
           put newGenerator
           return value
-
--- a random M as in Knuth for n = 5
-accuProbForM5 :: [Double]
-accuProbForM5 = accu probForM5
-
-aM5 :: Int -> Int
-aM5 seed = let randomM5 :: Gen Int
-               randomM5 =
-                 do randomDouble <- rand
-                    return (look randomDouble accuProbForM5 0)
-           in evalState randomM5 (mkStdGen seed)
 
 -- a random M as in Knuth for n = 10
 accuProbForM10 :: [Double]
@@ -217,6 +206,17 @@ aM25 seed = let randomM25 :: Gen Int
                      return (look randomDouble accuProbForM25 0)
             in evalState randomM25 (mkStdGen seed)
 
+-- a random M as in Knuth for n = 50
+accuProbForM50 :: [Double]
+accuProbForM50 = accu probForM50
+
+aM50 :: Int -> Int
+aM50 seed = let randomM50 :: Gen Int
+                randomM50 = 
+                  do randomDouble <- rand
+                     return (look randomDouble accuProbForM50 0)
+            in evalState randomM50 (mkStdGen seed)
+
 -- a random M as in Knuth for n = 100
 accuProbForM100 :: [Double]
 accuProbForM100 = accu probForM100
@@ -228,6 +228,17 @@ aM100 seed = let randomM100 :: Gen Int
                       return (look randomDouble accuProbForM100 0)
              in evalState randomM100 (mkStdGen seed)
 
+-- a random M as in Knuth for n = 500
+accuProbForM500 :: [Double]
+accuProbForM500 = accu probForM500
+
+aM500 :: Int -> Int
+aM500 seed = let randomM500 :: Gen Int
+                 randomM500 =
+                   do randomDouble <- rand
+                      return (look randomDouble accuProbForM500 0)
+             in evalState randomM500 (mkStdGen seed)
+
 -- a random M as in Knuth for n = 1000
 accuProbForM1000 :: [Double]
 accuProbForM1000 = accu probForM1000
@@ -238,7 +249,7 @@ aM1000 seed = let randomM1000 :: Gen Int
                     do randomDouble <- rand
                        return (look randomDouble accuProbForM1000 0)
               in evalState randomM1000 (mkStdGen seed)
-
+                
 -- make a 'restricted growth string' from a 'class description'
 -- `rgs` is an accumulator for the result, initially `rgs` contains only the value -1
 -- `l` is the list of 'a class description'
@@ -258,21 +269,23 @@ mkRGS :: [Int] -> [Int]
 mkRGS l = reverse $ rename (howToRename (take (length l) [-1,-1..]) 0 l) l
 
 --
-aRestGrStr5 :: Int -> [Int]
-aRestGrStr5 seed = mkRGS $ aString (seed + 1) 5 (aM5 seed)
-
 aRestGrStr10 :: Int -> [Int]
-aRestGrStr10 seed = mkRGS $ aString (seed + 1) 10 (aM10 seed)
+aRestGrStr10 seed = mkRGS $ aString seed 10 (aM10 (-seed))
 
 aRestGrStr25 :: Int -> [Int]
-aRestGrStr25 seed = mkRGS $ aString (seed + 1) 25 (aM25 seed)
+aRestGrStr25 seed = mkRGS $ aString seed 25 (aM25 (-seed))
+
+aRestGrStr50 :: Int -> [Int]
+aRestGrStr50 seed = mkRGS $ aString seed 50 (aM50 (-seed))
 
 aRestGrStr100 :: Int -> [Int]
-aRestGrStr100 seed = mkRGS $ aString (seed + 1) 100 (aM100 seed)
+aRestGrStr100 seed = mkRGS $ aString seed 100 (aM100 (-seed))
+
+aRestGrStr500 :: Int -> [Int]
+aRestGrStr500 seed = mkRGS $ aString seed 500 (aM500 (-seed))
 
 aRestGrStr1000 :: Int -> [Int]
-aRestGrStr1000 seed = mkRGS $ aString (seed + 1) 1000 (aM1000 seed)
-
+aRestGrStr1000 seed = mkRGS $ aString seed 1000 (aM1000 (-seed))
 
 -- ========== Canonical expressions ==========
 -- ~~~~ count ~~~~
@@ -366,17 +379,20 @@ canExp2LBT (Pair bt s) = let cE2LBT :: (BinTree,[Int]) -> Maybe (LabBinTree,[Int
 
 -- ~~~~ random generation ~~~~
 
-aCanExp5 :: Int -> CanExp
-aCanExp5 seed = Pair (aBinTree seed 4) (aRestGrStr5 seed)
-
 aCanExp10 :: Int -> CanExp
 aCanExp10 seed = Pair (aBinTree seed 9) (aRestGrStr10 seed)
 
 aCanExp25 :: Int -> CanExp
 aCanExp25 seed = Pair (aBinTree seed 24) (aRestGrStr25 seed)
 
+aCanExp50 :: Int -> CanExp
+aCanExp50 seed = Pair (aBinTree seed 49) (aRestGrStr50 seed)
+
 aCanExp100 :: Int -> CanExp
 aCanExp100 seed = Pair (aBinTree seed 99) (aRestGrStr100 seed)
+
+aCanExp500 :: Int -> CanExp
+aCanExp500 seed = Pair (aBinTree seed 499) (aRestGrStr500 seed)
 
 aCanExp1000 :: Int -> CanExp
 aCanExp1000 seed = Pair (aBinTree seed 999) (aRestGrStr1000 seed)
@@ -385,13 +401,14 @@ aCanExp1000 seed = Pair (aBinTree seed 999) (aRestGrStr1000 seed)
 -- sz is the number of external leaves and sz-1 is the number of internal nodes
 aCanExp :: Int -> Int ->  CanExp
 aCanExp seed sz =
-  if sz == 5 then aCanExp5 seed
-  else if sz == 10 then aCanExp10 seed
+  if sz == 10 then aCanExp10 seed
   else if sz == 25 then aCanExp25 seed
+  else if sz == 50 then aCanExp50 seed
   else if sz == 100 then aCanExp100 seed
+  else if sz == 500 then aCanExp500 seed
   else if sz == 1000 then aCanExp1000 seed
   else Pair (aBinTree seed (sz-1)) (aRestGrStr seed sz)
--- if not 25 or 100 or 1000 then, in practice,  it is limited to 12
+-- if not 10, 25, 50, 100, 500, 1000 then, in practice,  it is limited to 12
 
 -- ========== Statistics ==========
 -- The goal
@@ -408,7 +425,13 @@ isSimple (Leaf _) = False
 isSimple (LNode (Leaf n) lbt2) = goal lbt2 == n || isSimple lbt2
 isSimple (LNode _ lbt2) = isSimple lbt2
 
--- Recursively remove premises that are silly
+-- test that a canonical expression has the form e1 → ... → x0 → ... → x0
+isSimple0 :: LabBinTree -> Bool
+isSimple0 (Leaf n) = False
+isSimple0 (LNode (Leaf n) lbt2) = n == 0 || isSimple lbt2
+isSimple0 (LNode _ lbt2) = isSimple0 lbt2
+
+-- Recursively remove premises that are simple
 removeSimplePremises :: LabBinTree -> LabBinTree
 removeSimplePremises (Leaf n) = Leaf n
 removeSimplePremises (LNode lbt1 lbt2) =
@@ -468,7 +491,7 @@ isElim lbt =
 isEasy :: LabBinTree -> Bool
 isEasy lbt = isSimple lbt || isElim lbt
 
--- Remove premises that are easy
+-- Remove easy premises
 -- i.e., simple or Elim
 removeEasyPremises :: LabBinTree -> LabBinTree
 removeEasyPremises (Leaf n) = Leaf n
@@ -478,20 +501,18 @@ removeEasyPremises (LNode lbt1 lbt2) =
   in if isEasy lbt1' then lbt2'
      else LNode lbt1' lbt2'
 
-isVeryEasy :: LabBinTree -> Bool
-isVeryEasy lbt = isEasy $ removeEasyPremises lbt
-
--- Easy or silly
-isEasyOrSilly :: LabBinTree -> Bool
-isEasyOrSilly lbt = isEasy lbt || isSilly lbt
+-- Cheap
+isCheap :: LabBinTree -> Bool
+isCheap lbt = let afterRem = removeEasyPremises lbt
+              in isEasy afterRem || isSilly afterRem
 
 -- Remove premises that are easy or silly (perhaps not efficient)
-removeEasyOrSillyPremises :: LabBinTree -> LabBinTree
-removeEasyOrSillyPremises (Leaf n) = Leaf n
-removeEasyOrSillyPremises (LNode lbt1 lbt2) =
-  let lbt1' = removeEasyOrSillyPremises lbt1
-      lbt2' = removeEasyOrSillyPremises lbt2
-  in if isEasyOrSilly lbt1' then lbt2'
+removeEorSPremises :: LabBinTree -> LabBinTree
+removeEorSPremises (Leaf n) = Leaf n
+removeEorSPremises (LNode lbt1 lbt2) =
+  let lbt1' = removeEorSPremises lbt1
+      lbt2' = removeEorSPremises lbt2
+  in if isEasy lbt1' || isSilly lbt1' then lbt2'
      else LNode lbt1' lbt2'
 
 -- ~~~~ Classical theorems ~~~~
@@ -561,6 +582,11 @@ trivNonClass :: LabBinTree -> Bool
 trivNonClass (Leaf _) = True -- a variable is not a classical proposition
 trivNonClass (LNode lbt1 lbt2) = (goal lbt1 /= 0 || zeroIsPrem lbt1) && trivNonClass lbt2
 
+-- The definition of Genitrini et al. `simple non tautology` :
+-- goals of premisses are not x0
+isSimpNonTaut :: LabBinTree -> Bool
+isSimpNonTaut (Leaf n) = n == 0
+isSimpNonTaut (LNode lbt1 lbt2) = (goal lbt1 /= 0) && isSimpNonTaut lbt2
 
 -- a LabBinTree isWeakTaut if by renaming his indices larger than maxVar to maxVar it isTautL
 -- those terms are potential tautologies
@@ -570,7 +596,6 @@ isWeakTaut maxVar lbt =
   let renameBig (Leaf n) = if n < (maxVar - 1) then Leaf n else Leaf (maxVar -1)
       renameBig (LNode lbt1 lbt2) = LNode (renameBig lbt1) (renameBig lbt2)
   in isTautL (renameBig lbt)
-
 
 -- ~~~~ Statistics ~~~~
 -- given the largest variable index, a seed, the size of CanExps, and the size of the sample,
@@ -586,8 +611,7 @@ zaionc :: Int -> Int -> Int -> Int ->
                  (Int,Int,Double,[LabBinTree],[LabBinTree],Int)
 zaionc limitMaxVar seed sz szS =
     let sample = [canExp2LBT$aCanExp sid sz | sid<-map ((*) sz) [seed..(seed+(szS - 1))]]
-        afterRemEasy = map removeEasyPremises sample
-        (eOrS,notEOrS) =  partition isEasyOrSilly afterRemEasy
+        (eOrS,notEOrS) =  partition isCheap sample
         nbEOrS = length eOrS
         candidateTauts = filter (not.trivNonClass) notEOrS
         (small, big) = partition (\e -> (maxVar e) < limitMaxVar) candidateTauts
@@ -604,4 +628,16 @@ zaionc limitMaxVar seed sz szS =
 someTaut :: Int -> Int -> Int -> Int -> [LabBinTree]
 someTaut seed sz szS limitMaxVar =
   let sample = [canExp2LBT$aCanExp sid sz | sid <- [seed..(seed+szS-1)]]
-  in filter isTautL $ filter (\e -> (maxVar e) < limitMaxVar) $ filter (not.trivNonClass) $ filter (not.isEasyOrSilly) $ map removeEasyPremises sample
+  in filter isTautL $ filter (\e -> (maxVar e) < limitMaxVar) $ filter (not.trivNonClass) $ filter (not.isCheap) $ map removeEasyPremises sample
+
+generateAndCount :: Int -> Int -> (Int -> a) -> (a -> Bool) -> Int
+generateAndCount seed max aRand p = if max == 0 then 0
+                                    else let n = generateAndCount (seed + 1) (max - 1) aRand p
+                                         in if p (aRand seed) then n + 1 else n
+-- To check Genitrini et al. method, ratio simple over non simple tautologies
+genitrini :: Int -> Int -> Int -> (Int,Int)
+genitrini seed sz szS =
+    let (simp,notSimp) =  partition isSimple [canExp2LBT$aCanExp sid sz | sid<-map ((*) sz) [seed..(seed+(szS - 1))]]
+        nbSimp = length simp
+        nbNonSimpNonTaut = length $ filter (not.isSimpNonTaut) notSimp
+    in (nbSimp,nbNonSimpNonTaut)
