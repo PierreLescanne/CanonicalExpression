@@ -8,7 +8,7 @@ This repository contains three Haskell programs
 2. CanonicalExpression.hs contains several functions for binary trees, restricted growth strings and canonical expressions
 3. MainCanonicalExpression.hs contains utilities for building programs running in background
 
-This repository contains three files of data computed with thos programs
+This repository contains three files of data computed with those programs
 1. RatioIntuitionisticVsTautology.txt 
 2. RatioSimple.txt the ratio of simple intuitionistic theorems over all the cancnical expressions
 3. RatioNotNonCLassSimpl.txt: the ratio of simpl intuitionistc theorms over non classicla not simple tautologies
