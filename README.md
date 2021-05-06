@@ -9,6 +9,6 @@ This repository contains three Haskell programs
 3. MainCanonicalExpression.hs contains utilities for building programs running in background
 
 This repository contains three files of data computed with those programs
-1. RatioIntuitionisticVsTautology.txt 
-2. RatioSimple.txt the ratio of simple intuitionistic theorems over all the cancnical expressions
-3. RatioNotNonCLassSimpl.txt: the ratio of simpl intuitionistc theorms over non classicla not simple tautologies
+1. RatioIntuitionisticVsTautology.txt (ratio of cheap intuitinistic theorems vs cclassical theorems)
+2. RatioSimple.txt (ratio of simple intuitionistic theorems over all the canonical expressions)
+3. RatioNotNonCLassSimpl.txt (ratio of simple intuitionistc theorms over non simple antilogies, the evaluation of Genitrini et al.)
