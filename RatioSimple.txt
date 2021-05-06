@@ -208,14 +208,3 @@ sample size = 12000
 number of simple exps found = 72
 start time  2021-04-04 20:54:06.680147289 UTC
 finish time 2021-04-04 23:06:36.349673769 UTC
-
-----------------
-
-The ratio of simple expressions over all expressions is 4.9e-3
-seed = 1000
-expression size  = 1000
-sample size = 10000
-number of simple exps found = 49
-start time  2021-04-07 16:37:05.496788603 UTC
-finish time 2021-04-07 23:30:17.512414856 UTC
-

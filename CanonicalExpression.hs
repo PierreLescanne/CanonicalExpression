@@ -2,6 +2,7 @@ module CanonicalExpression where
 
 import Data.List
 import Data.Maybe
+import Data.Char
 import Text.Show
 import Control.Monad.State
 import System.Random
@@ -249,7 +250,18 @@ aM1000 seed = let randomM1000 :: Gen Int
                     do randomDouble <- rand
                        return (look randomDouble accuProbForM1000 0)
               in evalState randomM1000 (mkStdGen seed)
-                
+
+-- a random M as in Knuth for n = 2000
+accuProbForM2000 :: [Double]
+accuProbForM2000 = accu probForM2000
+
+aM2000 :: Int -> Int
+aM2000 seed = let randomM2000 :: Gen Int
+                  randomM2000 =
+                    do randomDouble <- rand
+                       return (look randomDouble accuProbForM2000 0)
+              in evalState randomM2000 (mkStdGen seed)
+                 
 -- make a 'restricted growth string' from a 'class description'
 -- `rgs` is an accumulator for the result, initially `rgs` contains only the value -1
 -- `l` is the list of 'a class description'
@@ -286,6 +298,9 @@ aRestGrStr500 seed = mkRGS $ aString seed 500 (aM500 (-seed))
 
 aRestGrStr1000 :: Int -> [Int]
 aRestGrStr1000 seed = mkRGS $ aString seed 1000 (aM1000 (-seed))
+
+aRestGrStr2000 :: Int -> [Int]
+aRestGrStr2000 seed = mkRGS $ aString seed 2000 (aM2000 (-seed))
 
 -- ========== Canonical expressions ==========
 -- ~~~~ count ~~~~
@@ -356,6 +371,33 @@ lBT2LBT :: [LabBinTree] -> ListLBT
 lBT2LBT [] = EmptyLBT
 lBT2LBT (e : l) = ConsLBT e (lBT2LBT l)
 
+-- parser of LabBinTree 
+parseLBT :: String -> Maybe (LabBinTree,String)
+parseLBT "" = Nothing
+parseLBT ('(' : st) = case parseLBT st of
+  Nothing -> Nothing
+  Just (lbt, "") -> Just (lbt,"")
+  Just (lbt1, '→' : s1) -> case parseLBT s1 of
+    Nothing -> Nothing
+    Just (lbt2, s2) -> case s2 of
+      (')' : s3) -> Just (LNode lbt1 lbt2, s3)
+      _ -> Nothing
+parseLBT ('x' : cn1 : cn2 : st) = -- n can be larger that 9 !
+    -- I assume n is less that 99
+  let n1 = ord cn1
+      n2 = ord cn2
+  in if (48 <= n1  && n1 <= 57 && 48 <= n2  && n2 <= 57)
+     then Just (Leaf (10*(n1 - 48) + (n2 - 48)), st)
+     else if (48 <= n1  && n1 <= 57)
+          then Just (Leaf (n1 - 48), cn2 : st)
+          else Nothing
+parseLBT ('x' : cn : "") =
+  let n = ord cn 
+  in if (48 <= n  && n <= 57)
+     then Just (Leaf (n - 48),"")
+     else Nothing
+parseLBT _ = Nothing
+
 -- translations of 'canonical expression' to a 'labeled  binary tree'
 canExp2LBT :: CanExp -> LabBinTree
 canExp2LBT (Pair bt s) = let cE2LBT :: (BinTree,[Int]) -> Maybe (LabBinTree,[Int])
@@ -397,6 +439,9 @@ aCanExp500 seed = Pair (aBinTree seed 499) (aRestGrStr500 seed)
 aCanExp1000 :: Int -> CanExp
 aCanExp1000 seed = Pair (aBinTree seed 999) (aRestGrStr1000 seed)
 
+aCanExp2000 :: Int -> CanExp
+aCanExp2000 seed = Pair (aBinTree seed 999) (aRestGrStr2000 seed)
+
 -- a random canonical expression, 1st Int is the seed, 2nd Int is the size
 -- sz is the number of external leaves and sz-1 is the number of internal nodes
 aCanExp :: Int -> Int ->  CanExp
@@ -407,8 +452,9 @@ aCanExp seed sz =
   else if sz == 100 then aCanExp100 seed
   else if sz == 500 then aCanExp500 seed
   else if sz == 1000 then aCanExp1000 seed
+  else if sz == 2000 then aCanExp2000 seed
   else Pair (aBinTree seed (sz-1)) (aRestGrStr seed sz)
--- if not 10, 25, 50, 100, 500, 1000 then, in practice,  it is limited to 12
+-- if not 10, 25, 50, 100, 500, 1000, 2000 then, in practice,  it is limited to 12
 
 -- ========== Statistics ==========
 -- The goal
@@ -445,19 +491,24 @@ isSimpleAfterRemoving :: LabBinTree -> Bool
 isSimpleAfterRemoving = isSimple . removeSimplePremises
 
 -- ~~~~ Silly intuitionistic theorems ~~~~
+-- the list of premises of a lablled binary tree
 premsOf :: LabBinTree -> [LabBinTree]
 premsOf (Leaf _) = []
 premsOf (LNode e1 e2) = e1 : premsOf e2
 
+-- equality on LabBintTree
 (=¤=) :: LabBinTree -> LabBinTree -> Bool
 (=¤=) (Leaf n) (Leaf n') = n == n'
 (=¤=) (LNode n1 n2) (LNode n1' n2') = n1 =¤= n1' && n2 =¤= n2'
 (=¤=) _ _ = False
 
+-- Does a given e end with e' ?
 endsWith :: LabBinTree -> LabBinTree -> Bool
 endsWith e@(LNode _ e1) e' = e =¤= e' || e1 `endsWith` e'
 endsWith _ _ = False
 
+-- Given an expression lbt and a list,
+-- does there exist an expression in the list which is the end of the expression
 existsEndsWith :: LabBinTree -> [LabBinTree] -> Bool
 existsEndsWith _ [] = False
 existsEndsWith lbt (lbt' : l)  = lbt `endsWith` lbt' || existsEndsWith lbt l
@@ -488,6 +539,34 @@ isElim lbt =
  let (b,i) = hasVarAsPrem lbt
  in if b then hasImpAsPrem i (goal lbt) lbt else False
 
+ -- ~~~~ a variant of isElim
+ -- look for a premise of the form xi → xg where xg is the goal
+hasImplicationAsPremise :: LabBinTree -> Maybe Int
+hasImplicationAsPremise lbt = hIAP lbt (goal lbt)
+  where hIAP (Leaf _) _ = Nothing
+        hIAP (LNode (LNode (Leaf i) (Leaf j)) lbt) g =
+          if j == g then Just i else hIAP lbt g
+        hIAP (LNode _ lbt) g = hIAP lbt g
+  
+ -- look for a premise of the form xi → x0
+hasImpAsPremAlt :: LabBinTree -> Maybe Int
+hasImpAsPremAlt (Leaf _) = Nothing
+hasImpAsPremAlt (LNode (LNode (Leaf i) (Leaf 0)) lbt) = Just i
+hasImpAsPremAlt (LNode _ lbt) = hasImpAsPremAlt lbt
+
+-- test whether the expression has premise xi
+isPrem :: Int -> LabBinTree -> Bool
+isPrem _ (Leaf _) = False
+isPrem i (LNode (Leaf j) lbt) = i == j || isPrem i lbt
+isPrem i (LNode _ lbt) = isPrem i lbt
+
+-- only if goal is x0
+isElimAlt :: LabBinTree -> Bool
+isElimAlt lbt = case hasImpAsPremAlt lbt of
+  Nothing -> False
+  Just i -> isPrem i lbt
+
+-- ~~~~ isEasy 
 isEasy :: LabBinTree -> Bool
 isEasy lbt = isSimple lbt || isElim lbt
 
@@ -503,8 +582,9 @@ removeEasyPremises (LNode lbt1 lbt2) =
 
 -- Cheap
 isCheap :: LabBinTree -> Bool
-isCheap lbt = let afterRem = removeEasyPremises lbt
-              in isEasy afterRem || isSilly afterRem
+isCheap lbt =
+  let afterRem = removeEasyPremises lbt
+  in isEasy afterRem || isSilly afterRem || isElimAlt afterRem
 
 -- Remove premises that are easy or silly (perhaps not efficient)
 removeEorSPremises :: LabBinTree -> LabBinTree
@@ -624,16 +704,12 @@ zaionc limitMaxVar seed sz szS =
         classTauts,bigs,tooBig)
 
 -- given the size of CanExp, and the size of the sample, and a seed
--- returns  tautologies which are not an easy or stupid theorem
+-- returns  tautologies which are not cheap theorems
 someTaut :: Int -> Int -> Int -> Int -> [LabBinTree]
 someTaut seed sz szS limitMaxVar =
   let sample = [canExp2LBT$aCanExp sid sz | sid <- [seed..(seed+szS-1)]]
   in filter isTautL $ filter (\e -> (maxVar e) < limitMaxVar) $ filter (not.trivNonClass) $ filter (not.isCheap) $ map removeEasyPremises sample
 
-generateAndCount :: Int -> Int -> (Int -> a) -> (a -> Bool) -> Int
-generateAndCount seed max aRand p = if max == 0 then 0
-                                    else let n = generateAndCount (seed + 1) (max - 1) aRand p
-                                         in if p (aRand seed) then n + 1 else n
 -- To check Genitrini et al. method, ratio simple over non simple tautologies
 genitrini :: Int -> Int -> Int -> (Int,Int)
 genitrini seed sz szS =
