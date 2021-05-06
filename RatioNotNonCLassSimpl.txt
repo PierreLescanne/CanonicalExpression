@@ -1,39 +1,59 @@
-----------------
-
-seed = 0
-expression size = 100
-sample size = 100
-number of simple expressions = 6
-number of non simple non tautology = 13
-The ration simple over not non classical simple is 0.46153846153846156
-start time  2021-04-08 11:52:19.795713049 UTC
-finish time 2021-04-08 11:52:28.397395656 UTC
-
 -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 seed = 0
 expression size = 100
-sample size = 400
+sample size = 5000
 -----
-number of simples = 19
-number of non simple non tautologies = 30
+number of simples = 176
+number of non simple non tautologies = 319
 -----
-The ratio simple over non simple non tautologies is 0.3877551020408163
+The ratio simple over non simple non tautologies is 0.35555555555555557
 -----
-start time:  2021-04-10 07:16:42.948119843 UTC
-finish time: 2021-04-10 07:20:42.115097104 UTC
+start time:  2021-04-17 06:31:36.598334794 UTC
+finish time: 2021-04-18 00:34:38.082108827 UTC
 
 -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-seed = 0
+on orange
+seed = 10000
 expression size = 100
-sample size = 4000
+sample size = 2000
 -----
-number of simples = 140
-number of non simple non tautologies = 249
+number of simples = 62
+number of non simple non tautologies = 128
 -----
-The ratio simple over non simple non tautologies is 0.35989717223650386
+The ratio simple over non simple non tautologies is 0.3263157894736842
 -----
-start time:  2021-04-10 08:02:43.002553549 UTC
-finish time: 2021-04-10 13:20:29.509493714 UTC
+start time:  2021-04-18 03:05:43.295962798 UTC
+finish time: 2021-04-18 15:08:12.173164612 UTC
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+on orange
+seed = 5000
+expression size = 100
+sample size = 2000
+-----
+number of simples = 78
+number of non simple non tautologies = 117
+-----
+The ratio simple over non simple non tautologies is 0.4
+-----
+start time:  2021-04-19 06:04:40.369301399 UTC
+finish time: 2021-04-19 15:12:29.396892617 UTC
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+on orange
+seed = 7000
+expression size = 100
+sample size = 1000
+-----
+number of simples = 31
+number of non simple non tautologies = 55
+-----
+The ratio simple over non simple non tautologies is 0.36046511627906974
+-----
+start time:  2021-04-19 16:41:39.649906007 UTC
+finish time: 2021-04-19 22:56:07.458106167 UTC
 
