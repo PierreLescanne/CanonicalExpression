@@ -1,7 +1,17 @@
 module Constants where
 
+import Data.Vector (Vector,(!),(//),replicate)
+
 generatorStarter :: Int
 generatorStarter = 0 {- generatorStarter is 0 -}
+
+-- The size of the vector used to generate binary trees
+sizeOfVector :: Int
+sizeOfVector = 1002
+
+-- The initial vector
+initialVector :: Vector Int
+initialVector = Data.Vector.replicate sizeOfVector (-1)
 
 -- data for Stam algorithm
 -- (see Knuth Algorithm R, in TAOCP vol4A, fasicle 3, § 7.2.1., page 74)

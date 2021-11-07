@@ -9,28 +9,27 @@ import System.Environment
 import Network.HostName
 
 ---------------------------------------------------------
--- Several results connected with Zaions paradox
+-- Several results connected with Zaionc paradox
 ---------------------------------------------------------
--- ratioCheapClass =
+-- zaionc =
 main =
-  let limitMaxVar = 31 {-- the index of the large variable --}
-      seed = 0
-      size = 100  {-- size of the formulas --}
-      sampleSize = 10  {-- size of the sample --}
-      
-      (nbSimpInt,nbTaut,ratio,tauts,bigs,tooBig) = zaionc limitMaxVar 0 size sampleSize
-      displayInit = "ratioCheapClass\n" ++
+  let limitMaxVar = 31 {-- the index of the largest variable --}
+      seed = 1
+      size =50  {-- size of the expressions --}
+      sampleSize = 200  {-- size of the sample --}
+      (nbCheap,nbTaut,ratio,tauts,bigs,nbBigs) = zaionc limitMaxVar 0 size sampleSize
+      displayInit = "ratio Cheap/Classical\n" ++
                     "seed = " ++ show seed ++
                     "\nexpression size = " ++ show size ++
                     "\nsample size = " ++ show sampleSize ++
                     "\nlargest variable = " ++ show limitMaxVar ++ "\n-----"
-      display = "yields " ++ show nbSimpInt ++
-                " intuitionistic propositions,\n" ++
-                "and " ++ show nbTaut ++ " tautologies, namely\n\n" ++ 
+      display = "yields " ++ show nbCheap ++
+                " cheap propositions,\n" ++
+                "and " ++ show nbTaut ++ " not intuitionistic tautologies, namely\n\n" ++ 
                 show (lBT2LBT tauts) ++
-                "ratio My-Intuitionistic/Tautologies is\n " ++
+                "ratio Cheap/Tautologies is\n " ++
                 show ratio ++ "\n\n" ++
-                show tooBig ++ " formulas were considered as too big" ++ " namely\n\n" ++
+                show nbBigs ++ " formulas were considered as too big, but potential tautologies" ++ " namely\n\n" ++
                 show (lBT2LBT bigs)
   in do startHour <- getCurrentTime
         hostName <- getHostName
@@ -39,7 +38,7 @@ main =
         hClose handlerLog
         handler <- openFile "./DATA/RatioIntuitionisticVsTautology.txt" AppendMode
         hPutStr handler ("----------------\n\n")
-        hPutStr handler ("on " ++ hostName ++ "\n" ++ display  ++ "\n")
+        hPutStr handler ("on " ++ hostName ++ "\n" ++ displayInit ++ "\n" ++ display  ++ "\n")
         finishHour <- getCurrentTime         
         hPutStr handler ("start hour = " ++ (show startHour) ++ "\n\n")        
         hPutStr handler ("finish hour = " ++ (show finishHour) ++ "\n\n")        
@@ -71,11 +70,11 @@ track =
 --------------------------------------------------
 ratioSimpl =
 -- main =
-  let sampleSize = 10
+  let sampleSize = 800
       seed = 0
-      size = 2000
-      sample = [canExp2LBT$aCanExp sid size | sid<- [seed..(seed+(sampleSize - 1))]]
-      nbSimpleS = length $ filter isSimple sample
+      size = 25
+      aCE seed = canExp2LBT $ aCanExp seed size
+      nbSimpleS = generateAndCount seed sampleSize aCE isSimple 
       ratio = (fromIntegral nbSimpleS) / (fromIntegral sampleSize)
       displayInit = "ratioSimpl\n" ++
                     "seed = " ++ show seed ++
@@ -83,6 +82,9 @@ ratioSimpl =
                     "\nsample size = " ++ show sampleSize ++ "\n-----\n"
       display = displayInit ++ "The ratio of simple expressions over all expressions is " ++
                 show ratio ++
+                "\nseed = " ++ show seed ++
+                "\nexpression size  = " ++ show size ++      
+                "\nsample size = " ++ show sampleSize ++
                 "\nnumber of simple exps found = " ++ show nbSimpleS
   in do startHour <- getCurrentTime
         hostName <- getHostName
@@ -104,6 +106,7 @@ ratioSimplNonClassSimp =
   let szS = 100
       seed = 0
       size = 25
+--      aCE seed = canExp2LBT $ aCanExp seed size -- a random canonical expression
       (nbSimp,nbNonSimpNonTaut) = genitrini  seed size szS
       ratio = (fromIntegral nbSimp) / (fromIntegral (nbSimp + nbNonSimpNonTaut))
       displayInit = "ratioSimplNonSimpAnt\n" ++

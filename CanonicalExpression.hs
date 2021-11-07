@@ -1,6 +1,7 @@
 module CanonicalExpression where
 
-import Data.List
+import Data.List hiding (replicate)
+import Data.Vector (Vector,(!),(//),toList,replicate)
 import Data.Maybe
 import Data.Char
 import Text.Show
@@ -47,8 +48,7 @@ binTrees :: [[BinTree]]
 binTrees = [Empty] : [let bTi = take n binTrees
                       in map (\(b1,b2) -> Node b1 b2) (foldl (++) [] (zipWith x bTi (reverse bTi)))
                      | n <- [1..]]
--- ~~~~ generate random
--- generate a random binary tree by Rémy's algorithm
+-- ~~~~ generate a random binary tree by Rémy's algorithm
 type Gen = State StdGen
 
 -- getting a random value between 0 and 4n-3 inclusive
@@ -62,13 +62,13 @@ randForRemy :: Int -> Int -> Int
 randForRemy seed n = evalState (randFR n) (mkStdGen ((seed+1)*n))
 
 
--- a Random Binary Tree coded as a List
+-- a Random Binary Tree coded == as a List == (obsolete)
 -- (external nodes are even numbers, internal nodes are odd numbers)
 -- (see Knuth Algorithm R, in TAOCP vol4A, fasicle 4, § 7.2.1.6, page 19)
 rbtL :: Int -> Int -> [Int]
 rbtL seed 0 = [0]
 rbtL seed n =
-  let x = randForRemy seed n
+  let x = randForRemy seed n -- a random value between 0 and 4n-3 inclusive
       l = rbtL seed (n-1)
       b = even x
       k = x `div` 2
@@ -76,15 +76,35 @@ rbtL seed n =
       l2n = if b then 2*n else l !! k
   in take k l ++ [2*n-1] ++ drop (k+1) l ++ [l2n1,l2n]
 
+-- a Random Binary Tree coded == as a vector ==
+-- (external nodes are even numbers, internal nodes are odd numbers)
+-- (see Knuth Algorithm R, in TAOCP vol4A, fasicle 4, § 7.2.1.6, page 19)
+
+rbt :: Int -> Int -> Vector Int
+rbt seed 0 = Data.Vector.replicate sizeOfVector (-1) // [(0,0)]
+rbt seed n =
+  let x = randForRemy seed n -- a random value between 0 and 4n-3 inclusive
+      v = rbt seed (n-1)
+      k = x `div` 2
+  in case even x of
+    True -> v // [(k,2*n-1),(2*n-1,v!k),(2*n,2*n)]
+    False -> v // [(k,2*n-1),(2*n-1,2*n),(2*n,v!k)]
+
+
 -- decode a list l representing a binary tree, starting at index n
 decodeBT :: Int -> [Int] -> BinTree 
 decodeBT n l = if even n then Empty
                          else Node (decodeBT (l !! n) l)
                                    (decodeBT (l !! (n+1)) l)
--- a random binary tree
-aBinTree :: Int -> Int -> BinTree
-aBinTree seed sz = let l = rbtL seed sz
+-- a random binary tree,  generated using a list
+aBinTreeL :: Int -> Int -> BinTree
+aBinTreeL seed sz = let l = rbtL seed sz
                    in decodeBT (l!!0) l
+
+-- a random binary tree, generated using a list
+aBinTreeV :: Int -> Int -> BinTree
+aBinTreeV seed sz = let v = rbt seed sz
+                    in decodeBT (v!0) (take (2*sz+2) $ toList v)
 
 -- ========== Stirling numbers and partitions ==========
 -- ~~~~ count ~~~~
@@ -156,9 +176,10 @@ partit_tab = [partitionsL n | n <- [0..]]
 partitionsR :: Int -> [[Int]]
 partitionsR n = foldl (++) [] [restGrStrsR i n | i <- [0..n]]
 
--- ~~~~ generate random partitions ~~~~
+-- ~~~~ generate random restricted growth string ~~~~
 -- pedestrian and unefficient method
--- given a seed and a size, returns a random canonical string of that size
+-- given a seed and a size,
+-- returns a 'Random Restricted Growth String' of that size
 aRestGrStr :: Int -> Int -> [Int]
 aRestGrStr seed sz = partitionsR sz !! (fromIntegral $ randomInt (fromIntegral $ (bell sz)) !! seed)
 -- limited to 12
@@ -250,18 +271,7 @@ aM1000 seed = let randomM1000 :: Gen Int
                     do randomDouble <- rand
                        return (look randomDouble accuProbForM1000 0)
               in evalState randomM1000 (mkStdGen seed)
-
--- a random M as in Knuth for n = 2000
-accuProbForM2000 :: [Double]
-accuProbForM2000 = accu probForM2000
-
-aM2000 :: Int -> Int
-aM2000 seed = let randomM2000 :: Gen Int
-                  randomM2000 =
-                    do randomDouble <- rand
-                       return (look randomDouble accuProbForM2000 0)
-              in evalState randomM2000 (mkStdGen seed)
-                 
+                
 -- make a 'restricted growth string' from a 'class description'
 -- `rgs` is an accumulator for the result, initially `rgs` contains only the value -1
 -- `l` is the list of 'a class description'
@@ -299,9 +309,6 @@ aRestGrStr500 seed = mkRGS $ aString seed 500 (aM500 (-seed))
 aRestGrStr1000 :: Int -> [Int]
 aRestGrStr1000 seed = mkRGS $ aString seed 1000 (aM1000 (-seed))
 
-aRestGrStr2000 :: Int -> [Int]
-aRestGrStr2000 seed = mkRGS $ aString seed 2000 (aM2000 (-seed))
-
 -- ========== Canonical expressions ==========
 -- ~~~~ count ~~~~
 -- The sequence of the numbers of canonical expressions A289679,
@@ -337,6 +344,7 @@ instance Show ListCanExp where
   show EmptyLCE = ""
   show (ConsLCE e l) = show e ++ "\n\n" ++ show l
 
+
 lCE2LCE :: [CanExp] -> ListCanExp
 lCE2LCE [] = EmptyLCE
 lCE2LCE (e : l) = ConsLCE e (lCE2LCE l)
@@ -360,7 +368,7 @@ instance Show LabBinTree where
   show (Leaf n) = "x" ++ show n
   show (LNode lbt1 lbt2) = "(" ++ show lbt1 ++ "→" ++ show lbt2 ++ ")"
 
--- To show nicely lists of CandExp
+-- To show nicely lists of LabBinTree
 data ListLBT = EmptyLBT | ConsLBT LabBinTree ListLBT
 
 instance Show ListLBT where
@@ -422,25 +430,22 @@ canExp2LBT (Pair bt s) = let cE2LBT :: (BinTree,[Int]) -> Maybe (LabBinTree,[Int
 -- ~~~~ random generation ~~~~
 
 aCanExp10 :: Int -> CanExp
-aCanExp10 seed = Pair (aBinTree seed 9) (aRestGrStr10 seed)
+aCanExp10 seed = Pair (aBinTreeV seed 9) (aRestGrStr10 seed)
 
 aCanExp25 :: Int -> CanExp
-aCanExp25 seed = Pair (aBinTree seed 24) (aRestGrStr25 seed)
+aCanExp25 seed = Pair (aBinTreeV seed 24) (aRestGrStr25 seed)
 
 aCanExp50 :: Int -> CanExp
-aCanExp50 seed = Pair (aBinTree seed 49) (aRestGrStr50 seed)
+aCanExp50 seed = Pair (aBinTreeV seed 49) (aRestGrStr50 seed)
 
 aCanExp100 :: Int -> CanExp
-aCanExp100 seed = Pair (aBinTree seed 99) (aRestGrStr100 seed)
+aCanExp100 seed = Pair (aBinTreeV seed 99) (aRestGrStr100 seed)
 
 aCanExp500 :: Int -> CanExp
-aCanExp500 seed = Pair (aBinTree seed 499) (aRestGrStr500 seed)
+aCanExp500 seed = Pair (aBinTreeV seed 499) (aRestGrStr500 seed)
 
 aCanExp1000 :: Int -> CanExp
-aCanExp1000 seed = Pair (aBinTree seed 999) (aRestGrStr1000 seed)
-
-aCanExp2000 :: Int -> CanExp
-aCanExp2000 seed = Pair (aBinTree seed 999) (aRestGrStr2000 seed)
+aCanExp1000 seed = Pair (aBinTreeV seed 999) (aRestGrStr1000 seed)
 
 -- a random canonical expression, 1st Int is the seed, 2nd Int is the size
 -- sz is the number of external leaves and sz-1 is the number of internal nodes
@@ -452,9 +457,8 @@ aCanExp seed sz =
   else if sz == 100 then aCanExp100 seed
   else if sz == 500 then aCanExp500 seed
   else if sz == 1000 then aCanExp1000 seed
-  else if sz == 2000 then aCanExp2000 seed
-  else Pair (aBinTree seed (sz-1)) (aRestGrStr seed sz)
--- if not 10, 25, 50, 100, 500, 1000, 2000 then, in practice,  it is limited to 12
+  else Pair (aBinTreeV seed (sz-1)) (aRestGrStr seed sz)
+-- if not 10, 25, 50, 100, 500, 1000 then, in practice,  it is limited to 12
 
 -- ========== Statistics ==========
 -- The goal
@@ -462,7 +466,7 @@ goal :: LabBinTree -> Int
 goal (Leaf n) = n
 goal (LNode _ lbt) = goal lbt
 
--- ~~~~ Silly intuitionistic theorems (see Genitrini, Kozik, Zaionc, def 1) ~~~~
+-- ~~~~ Simple intuitionistic theorems (see Genitrini, Kozik, Zaionc, def 1) ~~~~
 
 -- test that a canonical expression has the form e1 → ... → xn → ... → xn
 -- on labeled binary trees
@@ -490,7 +494,7 @@ removeSimplePremises (LNode lbt1 lbt2) =
 isSimpleAfterRemoving :: LabBinTree -> Bool
 isSimpleAfterRemoving = isSimple . removeSimplePremises
 
--- ~~~~ Silly intuitionistic theorems ~~~~
+-- ~~~~ Minor intuitionistic theorems ~~~~
 -- the list of premises of a lablled binary tree
 premsOf :: LabBinTree -> [LabBinTree]
 premsOf (Leaf _) = []
@@ -514,8 +518,8 @@ existsEndsWith _ [] = False
 existsEndsWith lbt (lbt' : l)  = lbt `endsWith` lbt' || existsEndsWith lbt l
 
 --  check for pattern of the form ... → p → ... → p
-isSilly :: LabBinTree -> Bool
-isSilly lbt = existsEndsWith lbt (premsOf lbt)
+isMinor :: LabBinTree -> Bool
+isMinor lbt = existsEndsWith lbt (premsOf lbt)
 
 -- ~~~~ implicative intuitionistic theorems by modus ponens
 -- Check whether an expression has a variabe as premise
@@ -534,12 +538,12 @@ hasImpAsPrem _ _ (Leaf _) = False
 
 -- Check pattern of the form .. → xi → .. (xi → xn) .. → xn
 -- or .. (xi → xn) → .. xi → .. → xn
-isElim :: LabBinTree -> Bool
-isElim lbt =
+isArrowElim :: LabBinTree -> Bool
+isArrowElim lbt =
  let (b,i) = hasVarAsPrem lbt
  in if b then hasImpAsPrem i (goal lbt) lbt else False
 
- -- ~~~~ a variant of isElim
+ -- ~~~~ a variant of isArrowElim
  -- look for a premise of the form xi → xg where xg is the goal
 hasImplicationAsPremise :: LabBinTree -> Maybe Int
 hasImplicationAsPremise lbt = hIAP lbt (goal lbt)
@@ -561,14 +565,14 @@ isPrem i (LNode (Leaf j) lbt) = i == j || isPrem i lbt
 isPrem i (LNode _ lbt) = isPrem i lbt
 
 -- only if goal is x0
-isElimAlt :: LabBinTree -> Bool
-isElimAlt lbt = case hasImpAsPremAlt lbt of
+isArrowElimAlt :: LabBinTree -> Bool
+isArrowElimAlt lbt = case hasImpAsPremAlt lbt of
   Nothing -> False
-  Just i -> isPrem i lbt
+  Just i -> i `isPrem` lbt
 
 -- ~~~~ isEasy 
 isEasy :: LabBinTree -> Bool
-isEasy lbt = isSimple lbt || isElim lbt
+isEasy lbt = isSimple lbt || isArrowElim lbt
 
 -- Remove easy premises
 -- i.e., simple or Elim
@@ -580,19 +584,21 @@ removeEasyPremises (LNode lbt1 lbt2) =
   in if isEasy lbt1' then lbt2'
      else LNode lbt1' lbt2'
 
+-- isEasyOrMinor
+isEasyOrMinor  :: LabBinTree -> Bool
+isEasyOrMinor lbt = isEasy lbt || isMinor lbt
+
 -- Cheap
 isCheap :: LabBinTree -> Bool
-isCheap lbt =
-  let afterRem = removeEasyPremises lbt
-  in isEasy afterRem || isSilly afterRem || isElimAlt afterRem
+isCheap lbt = isEasyOrMinor (removeEasyPremises lbt)
 
--- Remove premises that are easy or silly (perhaps not efficient)
-removeEorSPremises :: LabBinTree -> LabBinTree
-removeEorSPremises (Leaf n) = Leaf n
-removeEorSPremises (LNode lbt1 lbt2) =
-  let lbt1' = removeEorSPremises lbt1
-      lbt2' = removeEorSPremises lbt2
-  in if isEasy lbt1' || isSilly lbt1' then lbt2'
+-- Remove premises that are easy or minor (perhaps not efficient)
+removeEorMPremises :: LabBinTree -> LabBinTree
+removeEorMPremises (Leaf n) = Leaf n
+removeEorMPremises (LNode lbt1 lbt2) =
+  let lbt1' = removeEorMPremises lbt1
+      lbt2' = removeEorMPremises lbt2
+  in if isEasy lbt1' || isMinor lbt1' then lbt2'
      else LNode lbt1' lbt2'
 
 -- ~~~~ Classical theorems ~~~~
@@ -624,7 +630,7 @@ isTautology' e@(Pair t l) = all (check e) (map ((:) 0) (strings ((length l) -1) 
 tautologies' :: [[CanExp]]
 tautologies' = map (filter isTautology') canonicalExps
 
--- checks whether a LabIntTree expression satisfies an assignment
+-- checks whether a LabBinTree expression satisfies an assignment
 -- in the [Int] assignment values are 0 (False) or 1 (True)
 checkL :: LabBinTree -> [Int] -> Bool
 checkL (Leaf n) assg = (assg !! n) == 1
@@ -636,14 +642,14 @@ maxVar (Leaf n) = n
 maxVar (LNode lbt1 lbt2) = max (maxVar lbt1) (maxVar lbt2)
 
 -- we may assume α0 receives 0
--- isTautL is supposed to be applied on candidates (selected by not.trivNonClass)
+-- isTautL is supposed to be applied on candidates (selected by not.simpAntilogy)
 -- after removing trivial premises (see ratioIntVsMyT)
 isTautL :: LabBinTree -> Bool
 isTautL lbt =
   let maxV = maxVar lbt
   in all (checkL lbt) (map ((:) 0) (strings maxV 1))
 
--- `trivNonClass` is a  way to eliminate non classical propositions,
+-- `simpAntilogy` is a  way to eliminate non classical propositions,
 -- I assume that it is applied to the LabBinTree image
 -- of a canonical expressions (hence goal lbt == 0 i.e., α0 == 0)
 -- Assume now α0 := False and αi := True (for i /= 0)
@@ -652,15 +658,15 @@ isTautL lbt =
 --       then lbti := True
 -- then ..→ lbti → α0 := False
 -- then ..→ lbti → α0 is not a tautology
--- Therefore if trivNonClass(lbt) then lbt is not a tautology.
+-- Therefore if simpAntilogy(lbt) then lbt is not a tautology.
 zeroIsPrem :: LabBinTree -> Bool
 zeroIsPrem (Leaf _) = False
 zeroIsPrem (LNode (Leaf 0) _) = True
 zeroIsPrem (LNode _ lbt) = zeroIsPrem lbt
 
-trivNonClass :: LabBinTree -> Bool
-trivNonClass (Leaf _) = True -- a variable is not a classical proposition
-trivNonClass (LNode lbt1 lbt2) = (goal lbt1 /= 0 || zeroIsPrem lbt1) && trivNonClass lbt2
+simpAntilogy :: LabBinTree -> Bool
+simpAntilogy (Leaf _) = True -- a variable is not a classical proposition
+simpAntilogy (LNode lbt1 lbt2) = (goal lbt1 /= 0 || zeroIsPrem lbt1) && simpAntilogy lbt2
 
 -- The definition of Genitrini et al. `simple non tautology` :
 -- goals of premisses are not x0
@@ -668,7 +674,7 @@ isSimpNonTaut :: LabBinTree -> Bool
 isSimpNonTaut (Leaf n) = n == 0
 isSimpNonTaut (LNode lbt1 lbt2) = (goal lbt1 /= 0) && isSimpNonTaut lbt2
 
--- a LabBinTree isWeakTaut if by renaming his indices larger than maxVar to maxVar it isTautL
+-- a LabBinTree isWeakTaut if by renaming its indices larger than maxVar to maxVar it isTaut
 -- those terms are potential tautologies
 -- moreover if an expression is not WeakTaut, then it is not a tautology
 isWeakTaut :: Int -> LabBinTree -> Bool
@@ -691,25 +697,31 @@ zaionc :: Int -> Int -> Int -> Int ->
                  (Int,Int,Double,[LabBinTree],[LabBinTree],Int)
 zaionc limitMaxVar seed sz szS =
     let sample = [canExp2LBT$aCanExp sid sz | sid<-map ((*) sz) [seed..(seed+(szS - 1))]]
-        (eOrS,notEOrS) =  partition isCheap sample
-        nbEOrS = length eOrS
-        candidateTauts = filter (not.trivNonClass) notEOrS
+        afterRemoving = map removeEasyPremises sample
+        (cheap,notCheap) =  partition isEasyOrMinor afterRemoving
+        nbCheap = length cheap
+        candidateTauts = filter (not.simpAntilogy) notCheap
         (small, big) = partition (\e -> (maxVar e) < limitMaxVar) candidateTauts
-        classTauts = filter isTautL small
+        classTauts = filter isTautL small 
         nbClassTauts = length classTauts {-- nb of true classical tautologies --}
         bigs = filter (isWeakTaut limitMaxVar) big {-- big expressions that are potential tautologies --}
-        tooBig = length bigs
-    in (nbEOrS, nbClassTauts,
-        (fromIntegral nbEOrS) / (fromIntegral (nbEOrS + nbClassTauts)),
-        classTauts,bigs,tooBig)
+        nbBigs = length bigs {-- nb of big potential tautologies --}
+--}
+    in (nbCheap, nbClassTauts,
+        (fromIntegral nbCheap) / (fromIntegral (nbCheap + nbClassTauts+nbBigs)),
+        classTauts,bigs,nbBigs)
 
 -- given the size of CanExp, and the size of the sample, and a seed
 -- returns  tautologies which are not cheap theorems
 someTaut :: Int -> Int -> Int -> Int -> [LabBinTree]
 someTaut seed sz szS limitMaxVar =
   let sample = [canExp2LBT$aCanExp sid sz | sid <- [seed..(seed+szS-1)]]
-  in filter isTautL $ filter (\e -> (maxVar e) < limitMaxVar) $ filter (not.trivNonClass) $ filter (not.isCheap) $ map removeEasyPremises sample
+  in filter isTautL $ filter (\e -> (maxVar e) < limitMaxVar) $ filter (not.simpAntilogy) $ filter (not.isCheap) $ map removeEasyPremises sample
 
+generateAndCount :: Int -> Int -> (Int -> a) -> (a -> Bool) -> Int
+generateAndCount seed max aRand p = if max == 0 then 0
+                                    else let n = generateAndCount (seed + 1) (max - 1) aRand p
+                                         in if p (aRand seed) then n + 1 else n
 -- To check Genitrini et al. method, ratio simple over non simple tautologies
 genitrini :: Int -> Int -> Int -> (Int,Int)
 genitrini seed sz szS =
