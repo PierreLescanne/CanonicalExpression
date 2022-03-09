@@ -538,12 +538,12 @@ hasImpAsPrem _ _ (Leaf _) = False
 
 -- Check pattern of the form .. → xi → .. (xi → xn) .. → xn
 -- or .. (xi → xn) → .. xi → .. → xn
-isArrowElim :: LabBinTree -> Bool
-isArrowElim lbt =
+isMP :: LabBinTree -> Bool
+isMP lbt =
  let (b,i) = hasVarAsPrem lbt
  in if b then hasImpAsPrem i (goal lbt) lbt else False
 
- -- ~~~~ a variant of isArrowElim
+ -- ~~~~ a variant of isMP
  -- look for a premise of the form xi → xg where xg is the goal
 hasImplicationAsPremise :: LabBinTree -> Maybe Int
 hasImplicationAsPremise lbt = hIAP lbt (goal lbt)
@@ -565,14 +565,14 @@ isPrem i (LNode (Leaf j) lbt) = i == j || isPrem i lbt
 isPrem i (LNode _ lbt) = isPrem i lbt
 
 -- only if goal is x0
-isArrowElimAlt :: LabBinTree -> Bool
-isArrowElimAlt lbt = case hasImpAsPremAlt lbt of
+isMPAlt :: LabBinTree -> Bool
+isMPAlt lbt = case hasImpAsPremAlt lbt of
   Nothing -> False
   Just i -> i `isPrem` lbt
 
 -- ~~~~ isEasy 
 isEasy :: LabBinTree -> Bool
-isEasy lbt = isSimple lbt || isArrowElim lbt
+isEasy lbt = isSimple lbt || isMP lbt
 
 -- Remove easy premises
 -- i.e., simple or Elim
@@ -683,7 +683,10 @@ isWeakTaut maxVar lbt =
       renameBig (LNode lbt1 lbt2) = LNode (renameBig lbt1) (renameBig lbt2)
   in isTautL (renameBig lbt)
 
--- ~~~~ Statistics ~~~~
+-- ====================
+--      Statistics     
+-- ====================
+
 -- given the largest variable index, a seed, the size of CanExps, and the size of the sample,
 -- returns 6 values
 -- the number of simple intuitionistic propositions
